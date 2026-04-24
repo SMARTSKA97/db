@@ -51,6 +51,18 @@ BEGIN
         'pass', 
         'Operator', 
         'DDO001'
+    ),
+    (
+        'DDO001_OP2', 
+        'pass', 
+        'Operator', 
+        'DDO001'
+    ),
+    (
+        'DDO001_OP3', 
+        'pass', 
+        'Operator', 
+        'DDO001'
     ) 
     ON CONFLICT DO NOTHING;
 
