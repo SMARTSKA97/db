@@ -4,21 +4,34 @@ LANGUAGE plpgsql AS $$
 DECLARE 
     v_fy INT; 
     v_ddo VARCHAR; 
+    v_current_status INT;
     v_today DATE := (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date;
 BEGIN
     SELECT 
         financial_year, 
-        ddo_code 
+        ddo_code,
+        bill_status
     INTO 
         v_fy, 
-        v_ddo 
+        v_ddo,
+        v_current_status
     FROM bills.bill_list 
     WHERE bill_no = p_bill_no;
+
+    -- Guard: Only proceed if not already rejected
+    IF v_current_status = 3 THEN
+        RETURN;
+    END IF;
 
     UPDATE bills.bill_list 
     SET 
         bill_status = 3 
-    WHERE bill_no = p_bill_no;
+    WHERE bill_no = p_bill_no AND bill_status != 3;
+
+    -- If no rows updated (lost race), exit
+    IF NOT FOUND THEN
+        RETURN;
+    END IF;
     
     INSERT INTO dashboard.daily_ledger_admin 
         (financial_year, ledger_date, rejected_by_approver) 

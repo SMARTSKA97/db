@@ -10,7 +10,10 @@ BEGIN
         generated_bills, 
         forwarded_to_treasury, 
         received_by_approver, 
-        rejected_by_approver
+        rejected_by_approver,
+        bill_amount,
+        forwarded_amount,
+        fto_amount
     )
     SELECT 
         financial_year, 
@@ -19,7 +22,10 @@ BEGIN
         SUM(generated_bills), 
         SUM(forwarded_to_treasury), 
         SUM(received_by_approver), 
-        SUM(rejected_by_approver)
+        SUM(rejected_by_approver),
+        SUM(bill_amount),
+        SUM(forwarded_amount),
+        SUM(fto_amount)
     FROM dashboard.daily_ledger_admin 
     WHERE ledger_date < CURRENT_DATE 
     GROUP BY financial_year
@@ -29,7 +35,10 @@ BEGIN
         generated_bills = EXCLUDED.generated_bills, 
         forwarded_to_treasury = EXCLUDED.forwarded_to_treasury, 
         received_by_approver = EXCLUDED.received_by_approver, 
-        rejected_by_approver = EXCLUDED.rejected_by_approver;
+        rejected_by_approver = EXCLUDED.rejected_by_approver,
+        bill_amount = EXCLUDED.bill_amount,
+        forwarded_amount = EXCLUDED.forwarded_amount,
+        fto_amount = EXCLUDED.fto_amount;
 
     INSERT INTO dashboard.fy_summary_approver (
         financial_year, 
@@ -39,7 +48,10 @@ BEGIN
         generated_bills, 
         forwarded_to_treasury, 
         received_by_approver, 
-        rejected_by_approver
+        rejected_by_approver,
+        bill_amount,
+        forwarded_amount,
+        fto_amount
     )
     SELECT 
         financial_year, 
@@ -49,7 +61,10 @@ BEGIN
         SUM(generated_bills), 
         SUM(forwarded_to_treasury), 
         SUM(received_by_approver), 
-        SUM(rejected_by_approver)
+        SUM(rejected_by_approver),
+        SUM(bill_amount),
+        SUM(forwarded_amount),
+        SUM(fto_amount)
     FROM dashboard.daily_ledger_approver 
     WHERE ledger_date < CURRENT_DATE 
     GROUP BY financial_year, ddo_code
@@ -61,7 +76,10 @@ BEGIN
         generated_bills = EXCLUDED.generated_bills, 
         forwarded_to_treasury = EXCLUDED.forwarded_to_treasury, 
         received_by_approver = EXCLUDED.received_by_approver, 
-        rejected_by_approver = EXCLUDED.rejected_by_approver;
+        rejected_by_approver = EXCLUDED.rejected_by_approver,
+        bill_amount = EXCLUDED.bill_amount,
+        forwarded_amount = EXCLUDED.forwarded_amount,
+        fto_amount = EXCLUDED.fto_amount;
 
     INSERT INTO dashboard.fy_summary_operator (
         financial_year, 
@@ -72,7 +90,10 @@ BEGIN
         generated_bills, 
         forwarded_to_treasury, 
         received_by_approver, 
-        rejected_by_approver
+        rejected_by_approver,
+        bill_amount,
+        forwarded_amount,
+        fto_amount
     )
     SELECT 
         financial_year, 
@@ -83,7 +104,10 @@ BEGIN
         SUM(generated_bills), 
         SUM(forwarded_to_treasury), 
         SUM(received_by_approver), 
-        SUM(rejected_by_approver)
+        SUM(rejected_by_approver),
+        SUM(bill_amount),
+        SUM(forwarded_amount),
+        SUM(fto_amount)
     FROM dashboard.daily_ledger_operator 
     WHERE ledger_date < CURRENT_DATE 
     GROUP BY financial_year, ddo_code, userid
@@ -95,7 +119,10 @@ BEGIN
         generated_bills = EXCLUDED.generated_bills, 
         forwarded_to_treasury = EXCLUDED.forwarded_to_treasury, 
         received_by_approver = EXCLUDED.received_by_approver, 
-        rejected_by_approver = EXCLUDED.rejected_by_approver;
+        rejected_by_approver = EXCLUDED.rejected_by_approver,
+        bill_amount = EXCLUDED.bill_amount,
+        forwarded_amount = EXCLUDED.forwarded_amount,
+        fto_amount = EXCLUDED.fto_amount;
     
     UPDATE dashboard.sync_metadata 
     SET 

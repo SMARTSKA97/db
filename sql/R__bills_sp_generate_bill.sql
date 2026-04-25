@@ -29,11 +29,7 @@ BEGIN
     FROM processed_rows;
 
     IF v_count IS NULL OR v_count = 0 THEN
-        IF EXISTS (SELECT 1 FROM fto.fto_list WHERE fto_no = ANY(p_fto_nos) AND financial_year = p_fy) THEN
-            RAISE EXCEPTION 'Process Aborted: Selected FTOs are already processed or linked to another bill.';
-        ELSE
-            RAISE EXCEPTION 'Process Aborted: No matching FTOs found for the provided FTO numbers and Financial Year (%)', p_fy;
-        END IF;
+        RETURN;
     END IF;
 
     INSERT INTO 
@@ -55,20 +51,23 @@ BEGIN
             financial_year, 
             ledger_date, 
             processed_fto, 
-            generated_bills
+            generated_bills,
+            bill_amount
         ) 
     VALUES 
         (
             p_fy, 
             v_today, 
             v_count, 
-            1
+            1,
+            v_total_amount
         ) 
     ON CONFLICT (financial_year, ledger_date) 
     DO UPDATE 
     SET 
         processed_fto = daily_ledger_admin.processed_fto + EXCLUDED.processed_fto, 
-        generated_bills = daily_ledger_admin.generated_bills + 1;
+        generated_bills = daily_ledger_admin.generated_bills + 1,
+        bill_amount = daily_ledger_admin.bill_amount + EXCLUDED.bill_amount;
     
     INSERT INTO dashboard.daily_ledger_approver 
         (
@@ -76,7 +75,8 @@ BEGIN
             ddo_code, 
             ledger_date, 
             processed_fto, 
-            generated_bills
+            generated_bills,
+            bill_amount
         ) 
     VALUES 
         (
@@ -84,13 +84,15 @@ BEGIN
             p_ddo, 
             v_today, 
             v_count, 
-            1
+            1,
+            v_total_amount
         ) 
     ON CONFLICT (financial_year, ddo_code, ledger_date) 
     DO UPDATE 
     SET 
         processed_fto = daily_ledger_approver.processed_fto + EXCLUDED.processed_fto, 
-        generated_bills = daily_ledger_approver.generated_bills + 1;
+        generated_bills = daily_ledger_approver.generated_bills + 1,
+        bill_amount = daily_ledger_approver.bill_amount + EXCLUDED.bill_amount;
     
     INSERT INTO dashboard.daily_ledger_operator 
         (
@@ -99,7 +101,8 @@ BEGIN
             userid, 
             ledger_date, 
             processed_fto, 
-            generated_bills
+            generated_bills,
+            bill_amount
         ) 
     VALUES 
         (
@@ -108,13 +111,15 @@ BEGIN
             p_user, 
             v_today, 
             v_count, 
-            1
+            1,
+            v_total_amount
         ) 
     ON CONFLICT (financial_year, ddo_code, userid, ledger_date) 
     DO UPDATE 
     SET 
         processed_fto = daily_ledger_operator.processed_fto + EXCLUDED.processed_fto, 
-        generated_bills = daily_ledger_operator.generated_bills + 1;
+        generated_bills = daily_ledger_operator.generated_bills + 1,
+        bill_amount = daily_ledger_operator.bill_amount + EXCLUDED.bill_amount;
     
     PERFORM pg_notify('dash_updates', p_fy || ':Admin:' || p_ddo || ':Op:' || p_user || ':BILL_GEN');
 END; $$;
